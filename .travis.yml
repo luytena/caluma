@@ -13,6 +13,8 @@ env:
     - DOCKER_COMPOSE_VERSION=1.24.0
 
 before_install:
+  # TODO remove when finishid with graphene_django_v3 branch
+  - git fetch origin graphene_django_v3:graphene_django_v3
   # install newer compose version
   - sudo rm /usr/local/bin/docker-compose
   - curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` > docker-compose
@@ -38,7 +40,9 @@ jobs:
         - docker-compose exec caluma flake8
         - docker-compose exec caluma gitlint --commits ${TRAVIS_BRANCH}..HEAD lint
         - docker-compose exec caluma ./manage.py makemigrations --check --dry-run --no-input
-        - docker-compose exec caluma pytest --no-cov-on-fail --cov --create-db -vv
+        - docker-compose exec caluma pytest --create-db -vv
+        # TODO: reenable coverage when finishid with graphene_django_v3 branch
+        # - docker-compose exec caluma pytest --no-cov-on-fail --cov --create-db -vv
         - docker-compose exec caluma reuse lint
     - env:
         BUILD_TYPE=pipenv

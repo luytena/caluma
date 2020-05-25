@@ -18,6 +18,7 @@ from .caluma_form import factories as form_factories
 from .caluma_user.models import AnonymousUser, OIDCUser
 from .caluma_workflow import factories as workflow_factories
 from .schema import schema
+from .xfailit import non_strict, strict
 
 Faker.add_provider(MultilangProvider)
 
@@ -30,6 +31,14 @@ def register_module(module):
 
 register_module(form_factories)
 register_module(workflow_factories)
+
+
+@pytest.fixture(scope="function", autouse=True)
+def _faillist(request):
+    if request.node.nodeid in non_strict:
+        request.applymarker(pytest.mark.xfail())
+    elif request.node.nodeid in strict:
+        request.applymarker(pytest.mark.xfail(strict=True))
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -71,12 +80,14 @@ def info(anonymous_request):
         None,
         None,
         None,
+        path=None,
         schema=None,
         fragments=None,
         root_value=None,
         operation=None,
         variable_values=None,
         context=anonymous_request,
+        is_awaitable=None,
     )
 
 
@@ -88,12 +99,14 @@ def admin_info(admin_request):
         None,
         None,
         None,
+        path=None,
         schema=None,
         fragments=None,
         root_value=None,
         operation=None,
         variable_values=None,
         context=admin_request,
+        is_awaitable=None,
     )
 
 
